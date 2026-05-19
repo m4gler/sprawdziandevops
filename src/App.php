@@ -13,6 +13,6 @@ final class App
 
     public function health(): string
     {
-        return 'healthy';
+        return 'ok';
     }
 }
