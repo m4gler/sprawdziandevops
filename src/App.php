@@ -6,7 +6,7 @@ namespace App;
 
 final class App
 {
-    public function home():string
+    public function home(): string
     {
         return 'hello from php app';
     }

@@ -25,7 +25,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: php-app-image
           path: php-app.tar.gz
 
       - run: docker compose up -d --build
@@ -38,7 +37,6 @@ jobs:
       - if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: compose-logs
           path: compose.log
 
       - if: always()
