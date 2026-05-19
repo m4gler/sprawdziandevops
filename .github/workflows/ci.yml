@@ -1,0 +1,42 @@
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+      - run: composer install --no-interaction --no-progress
+      - run: composer lint
+      - run: curl -sS http:localhost
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+      - run: composer install --no-interaction --no-progress
+      - run: mkdir -p build
+      - run: composer test:junit
+      - uses: actions/upload-artifact@v4
+        with:
+          path: build/junit.xml
+
+  docker_smoke:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t php-app .
+      - run: docker run -d --name php-app-container -p 8080:8080 php-app
+      - run: curl -fsS http://localhost:8080/health

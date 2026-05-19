@@ -1,0 +1,41 @@
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          outputs: type=docker,dest=php-app.tar
+
+      - run: gzip -c php-app.tar > php-app.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          path: php-app.tar.gz
+
+      - run: docker compose up -d --build
+      - run: curl -fsS http://localhost:8080/health
+
+        if: always()
+        run: docker compose logs &> compose.log || true
+
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          path: compose.log
+
+        if: always()
+        run: docker compose down -v || true

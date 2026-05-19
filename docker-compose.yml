@@ -1,0 +1,6 @@
+services:
+  web:
+    build: .
+    image: php-docker-actions:8.3
+    ports:
+      - "8080"
